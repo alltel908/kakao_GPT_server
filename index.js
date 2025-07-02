@@ -13,7 +13,12 @@ app.use(express.json());
 app.post(['/', '/skill'], async (req, res) => {
   console.log('카카오 요청 수신:', JSON.stringify(req.body, null, 2));
 
-  const userMessage = req.body?.userRequest?.utterance || '안녕하세요';
+const userMessage =
+  req.body?.userRequest?.utterance ||
+  req.body?.utterance ||
+  JSON.stringify(req.body) ||
+  '안녕하세요';
+
 
   try {
     const gptResponse = await axios.post(
