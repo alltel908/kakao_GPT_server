@@ -5,6 +5,9 @@ const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// ✅ .env에서 모델명 불러오기 (기본값은 'gpt-4o-mini')
+const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
 app.use(express.json());
 
 app.post(['/', '/skill'], async (req, res) => {
@@ -16,8 +19,7 @@ app.post(['/', '/skill'], async (req, res) => {
     const gptResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        // ✅ 여기가 핵심: GPT-4o mini 모델명
-        model: 'gpt-4o-mini', // ⚠️ 사용 가능 여부 반드시 확인
+        model: openaiModel,
         messages: [
           { role: 'system', content: '친절한 비서처럼 응답해주세요.' },
           { role: 'user', content: userMessage }
