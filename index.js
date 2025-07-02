@@ -5,13 +5,13 @@ const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ .env에서 모델명 불러오기 (기본값은 'gpt-4o-mini')
+// ✅ .env에서 모델명 불러오기 (기본값은 'gpt-4o')
 const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o';
 
 app.use(express.json());
 
 app.post(['/', '/skill'], async (req, res) => {
-  console.log('카카오 요청 수신:', req.body);
+  console.log('카카오 요청 수신:', JSON.stringify(req.body, null, 2));
 
   const userMessage = req.body?.userRequest?.utterance || '안녕하세요';
 
@@ -51,7 +51,13 @@ app.post(['/', '/skill'], async (req, res) => {
     res.json(kakaoResponse);
 
   } catch (error) {
-    console.error('GPT 요청 오류:', error.message);
+    console.error('❌ GPT 요청 오류:', error.message);
+    if (error.response) {
+      console.error('❗ 상태 코드:', error.response.status);
+      console.error('❗ 응답 데이터:', JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error('❗ 응답 객체 없음. 전체 에러:', error);
+    }
 
     res.json({
       version: "2.0",
