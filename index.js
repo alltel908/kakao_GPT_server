@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // ✅ .env에서 모델명 불러오기 (기본값은 'gpt-4o-mini')
-const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o';
 
 app.use(express.json());
 
