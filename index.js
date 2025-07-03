@@ -5,26 +5,36 @@ const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ .env에서 모델명 불러오기 (기본값은 'gpt-4o')
-const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o';
-
 app.use(express.json());
 
 app.post(['/', '/skill'], async (req, res) => {
-  console.log('카카오 요청 수신:', JSON.stringify(req.body, null, 2));
+  console.log('✅ 요청 수신됨');
+  console.log('헤더:', req.headers);
+  console.log('바디:', JSON.stringify(req.body, null, 2));
 
-const userMessage =
-  req.body?.userRequest?.utterance ||
-  req.body?.utterance ||
-  JSON.stringify(req.body) ||
-  '안녕하세요';
+  const userMessage = req.body?.userRequest?.utterance;
 
+  if (!userMessage) {
+    console.error('❌ userRequest.utterance가 없습니다.');
+    return res.json({
+      version: "2.0",
+      template: {
+        outputs: [
+          {
+            simpleText: {
+              text: "요청 내용이 없습니다. 다시 시도해 주세요."
+            }
+          }
+        ]
+      }
+    });
+  }
 
   try {
     const gptResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: openaiModel,
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [
           { role: 'system', content: '친절한 비서처럼 응답해주세요.' },
           { role: 'user', content: userMessage }
@@ -33,14 +43,14 @@ const userMessage =
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
         }
       }
     );
 
     const replyText = gptResponse.data.choices[0].message.content;
 
-    const kakaoResponse = {
+    return res.json({
       version: "2.0",
       template: {
         outputs: [
@@ -51,20 +61,12 @@ const userMessage =
           }
         ]
       }
-    };
-
-    res.json(kakaoResponse);
+    });
 
   } catch (error) {
-    console.error('❌ GPT 요청 오류:', error.message);
-    if (error.response) {
-      console.error('❗ 상태 코드:', error.response.status);
-      console.error('❗ 응답 데이터:', JSON.stringify(error.response.data, null, 2));
-    } else {
-      console.error('❗ 응답 객체 없음. 전체 에러:', error);
-    }
+    console.error('❌ GPT 요청 오류:', error.response?.data || error.message);
 
-    res.json({
+    return res.json({
       version: "2.0",
       template: {
         outputs: [
