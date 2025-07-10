@@ -1,9 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.js", "use": "@vercel/node" }
+    {
+      "src": "api/skill.js",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/api/chat", "dest": "index.js" }
+    {
+      "src": "/api/skill",
+      "dest": "api/skill.js"
+    }
   ]
 }
