@@ -10,11 +10,12 @@ export default async function handler(req, res) {
 
   const userInput = body.userRequest?.utterance || "";
   const callbackUrl = body.userRequest?.callbackUrl;
-  const callbackToken = req.headers['x-kakao-callback-token']; // ✅ 핵심 수정
+
+  // ✅ 이 부분이 가장 중요합니다. 소문자 헤더에서 토큰을 가져옵니다.
+  const callbackToken = req.headers['x-kakao-callback-token'];
 
   console.log('[userInput]', userInput);
-  console.log('[callbackUrl]', callbackUrl);
-  console.log('[callbackToken]', callbackToken);
+  console.log('[callbackToken]', callbackToken); // 이 로그를 꼭 확인해야 합니다.
 
   if (!callbackUrl) {
     return res.status(400).json({ error: "요청에 callbackUrl이 포함되지 않았습니다." });
@@ -30,6 +31,7 @@ export default async function handler(req, res) {
     const gptText = await handleFreeQuestion(userInput);
     console.log('[GPT 응답]', gptText);
 
+    // ✅ 콜백 응답 헤더에 토큰을 포함해서 전송합니다.
     await axios.post(
       callbackUrl,
       {
@@ -41,7 +43,7 @@ export default async function handler(req, res) {
       {
         headers: {
           "Content-Type": "application/json;charset=UTF-8",
-          "X-Kakao-Callback-TOKEN": callbackToken,
+          "X-Kakao-Callback-TOKEN": callbackToken, // ✅ 필수
         },
       }
     );
