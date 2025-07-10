@@ -1,5 +1,3 @@
-// 최종 배포를 위한 수정2
-
 import axios from "axios";
 import { handleFreeQuestion } from '../handleUserQuestion.js';
 
@@ -9,7 +7,6 @@ export default async function handler(req, res) {
   }
 
   const body = req.body;
-
   const userInput = body.userRequest?.utterance || "";
   const callbackUrl = body.userRequest?.callbackUrl;
   const callbackToken = req.headers['x-kakao-callback-token'];
@@ -21,12 +18,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "요청에 callbackUrl이 포함되지 않았습니다." });
   }
 
-  // ✅ 5초 내 선응답 (이 부분의 메시지를 변경했습니다)
   res.status(200).json({
     version: "2.0",
     useCallback: true,
-    // 👇 이 부분이 변경되었습니다.
-    data: { text: "서버 최종 버전 V3 테스트 중입니다." },
+    data: { text: "답변을 준비 중이에요 😊" },
   });
 
   try {
