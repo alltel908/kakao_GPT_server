@@ -11,9 +11,6 @@ export default async function handler(req, res) {
   const callbackUrl = body.userRequest?.callbackUrl;
   const callbackToken = req.headers['x-kakao-callback-token'];
 
-// 👇 헤더 전체를 출력하는 로그를 추가
-console.log('[All Headers]', JSON.stringify(req.headers, null, 2));
-
   console.log('[userInput]', userInput);
   console.log('[callbackToken]', callbackToken);
 
@@ -29,12 +26,7 @@ console.log('[All Headers]', JSON.stringify(req.headers, null, 2));
 
   try {
     const gptText = await handleFreeQuestion(userInput);
-    
-    // 이 로그는 이미 GPT의 응답을 보여주고 있습니다.
     console.log('[GPT 응답]', gptText);
-
-    // 👇 GPT 답변을 카카오로 보내기 직전, 그 내용이 비어있는지 마지막으로 확인하는 로그를 추가합니다.
-    console.log('[Final Check before sending]', gptText);
 
     await axios.post(
       callbackUrl,
