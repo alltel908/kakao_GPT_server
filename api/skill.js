@@ -11,6 +11,9 @@ export default async function handler(req, res) {
   const callbackUrl = body.userRequest?.callbackUrl;
   const callbackToken = req.headers['x-kakao-callback-token'];
 
+// 👇 헤더 전체를 출력하는 로그를 추가
+console.log('[All Headers]', JSON.stringify(req.headers, null, 2));
+
   console.log('[userInput]', userInput);
   console.log('[callbackToken]', callbackToken);
 
