@@ -19,13 +19,15 @@ export default async function handler(req, res) {
       console.log("🟡 fallback 모드: callbackUrl 없음");
       const result = await handleUserQuestion(userInput, category);
 
+      const replyText = typeof result === "string" ? result : result?.answer || "답변이 비어있습니다.";
+
       return res.status(200).json({
         version: "2.0",
         template: {
           outputs: [
             {
               simpleText: {
-                text: result.answer
+                text: replyText
               }
             }
           ]
@@ -42,15 +44,15 @@ export default async function handler(req, res) {
     });
 
     const result = await handleUserQuestion(userInput, category);
+    const replyText = typeof result === "string" ? result : result?.answer || "답변이 비어있습니다.";
 
-    // GPT 응답 결과를 callbackUrl로 전송
     await axios.post(callbackUrl, {
       version: "2.0",
       template: {
         outputs: [
           {
             simpleText: {
-              text: result.answer
+              text: replyText
             }
           }
         ]
