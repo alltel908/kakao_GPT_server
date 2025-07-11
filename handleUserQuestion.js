@@ -5,7 +5,7 @@ import { callGPTWithFAQ_wifi } from './gpt/callGPTWithFAQ_wifi.js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export async function handleFreeQuestion(userInput) {
+export async function handleUserQuestion(userInput) {
   const classification = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [

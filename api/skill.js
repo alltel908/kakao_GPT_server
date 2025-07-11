@@ -1,7 +1,7 @@
 // /api/skill.js
 
 import axios from "axios";
-import { handleUserQuestion } from "../handleUserQuestion.js";  
+import { handleUserQuestion } from "../handleUserQuestion.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
