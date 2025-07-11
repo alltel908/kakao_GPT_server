@@ -21,7 +21,8 @@ export default async function handler(req, res) {
   res.status(200).json({
     version: "2.0",
     useCallback: true,
-    data: { text: "답변을 준비 중이에요 😊" },
+     // 👇 이 부분의 text 내용을 새로운 문장으로 변경!
+  data: { text: "Vercel 최종 배포 테스트" },
   });
 
   try {
