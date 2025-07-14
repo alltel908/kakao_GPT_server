@@ -82,7 +82,6 @@ ${faqTextBlock}
       role: "user",
       content: userInput
     }
-export default callGPTWithFAQ_after_esim;
   ];
 
   const chat = await openai.chat.completions.create({
