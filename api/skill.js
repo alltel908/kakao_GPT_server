@@ -11,16 +11,24 @@ export default async function handler(req, res) {
   const userInput = body.userRequest?.utterance || "";
   const callbackUrl = body.userRequest?.callbackUrl;
 
-  // ✅ 이 부분이 가장 중요합니다. 소문자 헤더에서 토큰을 가져옵니다.
-  const callbackToken = req.body.userRequest?.callbackToken;
+  // ✅ 헤더에서 callbackToken 가져오기 (대소문자 모두 대비)
+  const callbackToken =
+    req.headers['x-kakao-callback-token'] ||
+    req.headers['X-Kakao-Callback-Token'] ||
+    req.headers['X-KAKAO-CALLBACK-TOKEN'] ||
+    '';
 
-  console.log('[userInput]', userInput);
-  console.log('[callbackToken]', callbackToken); // 이 로그를 꼭 확인해야 합니다.
+  // ✅ 전체 로그 출력 (디버깅용)
+  console.log('🟡 [userInput]', userInput);
+  console.log('🟡 [callbackUrl]', callbackUrl);
+  console.log('🟡 [callbackToken]', callbackToken || '[없음]');
+  console.log('🟡 [All Headers]', JSON.stringify(req.headers, null, 2));
 
   if (!callbackUrl) {
     return res.status(400).json({ error: "요청에 callbackUrl이 포함되지 않았습니다." });
   }
 
+  // ✅ 선 응답 (5초 이내)
   res.status(200).json({
     version: "2.0",
     useCallback: true,
@@ -29,9 +37,13 @@ export default async function handler(req, res) {
 
   try {
     const gptText = await handleFreeQuestion(userInput);
-    console.log('[GPT 응답]', gptText);
+    console.log('🟢 [GPT 응답]', gptText);
 
-    // ✅ 콜백 응답 헤더에 토큰을 포함해서 전송합니다.
+    // ✅ callbackToken이 없을 경우 경고
+    if (!callbackToken) {
+      console.warn('❌ [경고] callbackToken이 없어 콜백 응답이 무시될 수 있습니다.');
+    }
+
     await axios.post(
       callbackUrl,
       {
@@ -43,12 +55,12 @@ export default async function handler(req, res) {
       {
         headers: {
           "Content-Type": "application/json;charset=UTF-8",
-          "X-Kakao-Callback-TOKEN": callbackToken, // ✅ 필수
+          ...(callbackToken && { "X-Kakao-Callback-TOKEN": callbackToken }),
         },
       }
     );
   } catch (error) {
-    console.error('[GPT 또는 콜백 에러]', error?.response?.data || error.message);
+    console.error('🔴 [GPT 또는 콜백 에러]', error?.response?.data || error.message);
 
     await axios.post(
       callbackUrl,
@@ -61,7 +73,7 @@ export default async function handler(req, res) {
       {
         headers: {
           "Content-Type": "application/json;charset=UTF-8",
-          "X-Kakao-Callback-TOKEN": callbackToken,
+          ...(callbackToken && { "X-Kakao-Callback-TOKEN": callbackToken }),
         },
       }
     );
