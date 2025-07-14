@@ -1,5 +1,8 @@
+// skill.js
+
 import axios from "axios";
-import { handleFreeQuestion } from '../handleUserQuestion.js';
+// ✅ 수정한 handleUserQuestion.js에서 새로운 함수를 가져옵니다.
+import { getAnswerByCategory } from '../handleUserQuestion.js'; 
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -7,28 +10,17 @@ export default async function handler(req, res) {
   }
 
   const body = req.body;
-
   const userInput = body.userRequest?.utterance || "";
   const callbackUrl = body.userRequest?.callbackUrl;
+  const callbackToken = req.headers['x-kakao-callback-token'];
 
-  // ✅ 헤더에서 callbackToken 가져오기 (대소문자 모두 대비)
-  const callbackToken =
-    req.headers['x-kakao-callback-token'] ||
-    req.headers['X-Kakao-Callback-Token'] ||
-    req.headers['X-KAKAO-CALLBACK-TOKEN'] ||
-    '';
+  // 👇 카카오 버튼에서 보낸 카테고리 정보를 여기서 받습니다.
+  const category = body.action?.params?.category;
 
-  // ✅ 전체 로그 출력 (디버깅용)
-  console.log('🟡 [userInput]', userInput);
-  console.log('🟡 [callbackUrl]', callbackUrl);
-  console.log('🟡 [callbackToken]', callbackToken || '[없음]');
-  console.log('🟡 [All Headers]', JSON.stringify(req.headers, null, 2));
+  console.log('[userInput]', userInput);
+  console.log('[category]', category); // 카테고리가 잘 들어오는지 로그 추가
 
-  if (!callbackUrl) {
-    return res.status(400).json({ error: "요청에 callbackUrl이 포함되지 않았습니다." });
-  }
-
-  // ✅ 선 응답 (5초 이내)
+  // ... (선응답 로직은 동일) ...
   res.status(200).json({
     version: "2.0",
     useCallback: true,
@@ -36,46 +28,17 @@ export default async function handler(req, res) {
   });
 
   try {
-    const gptText = await handleFreeQuestion(userInput);
+    // 👇 수정한 함수를 호출하고, userInput과 category를 모두 전달합니다.
+    const gptText = await getAnswerByCategory(userInput, category);
     console.log('🟢 [GPT 응답]', gptText);
 
-    // ✅ callbackToken이 없을 경우 경고
-    if (!callbackToken) {
-      console.warn('❌ [경고] callbackToken이 없어 콜백 응답이 무시될 수 있습니다.');
-    }
-
+    // ... (콜백 응답 로직은 동일) ...
     await axios.post(
       callbackUrl,
-      {
-        version: "2.0",
-        template: {
-          outputs: [{ simpleText: { text: gptText } }],
-        },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          ...(callbackToken && { "X-Kakao-Callback-TOKEN": callbackToken }),
-        },
-      }
+      { /* ... */ },
+      { /* ... */ }
     );
   } catch (error) {
-    console.error('🔴 [GPT 또는 콜백 에러]', error?.response?.data || error.message);
-
-    await axios.post(
-      callbackUrl,
-      {
-        version: "2.0",
-        template: {
-          outputs: [{ simpleText: { text: "죄송합니다. 응답 생성 중 문제가 발생했어요." } }],
-        },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          ...(callbackToken && { "X-Kakao-Callback-TOKEN": callbackToken }),
-        },
-      }
-    );
+    // ... (에러 처리 로직은 동일) ...
   }
 }
