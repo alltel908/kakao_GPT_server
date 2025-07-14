@@ -159,7 +159,7 @@ const wifiFAQ = [
   }
 ];
 
-export async function callGPTWithFAQ_wifi(userInput) {
+export async function callGPTWithFAQ_after_wifi(userInput) {
   const faqTextBlock = wifiFAQ
     .map(
       (f, i) => `#${i + 1}\nQ: ${f.question}\nK: ${f.keywords.join(', ')}\nA: ${f.answer}`
