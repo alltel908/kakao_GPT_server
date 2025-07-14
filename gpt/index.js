@@ -1,11 +1,11 @@
-// index.js
+// gpt/index.js
 
-import { callGPTWithFAQ_before_esim } from './gpt/callGPTWithFAQ_before_esim.js';
-import { callGPTWithFAQ_before_usim } from './gpt/callGPTWithFAQ_before_usim.js';
-import { callGPTWithFAQ_before_wifi } from './gpt/callGPTWithFAQ_before_wifi.js';
-import { callGPTWithFAQ_after_esim } from './gpt/callGPTWithFAQ_after_esim.js';
-import { callGPTWithFAQ_after_usim } from './gpt/callGPTWithFAQ_after_usim.js';
-import { callGPTWithFAQ_after_wifi } from './gpt/callGPTWithFAQ_after_wifi.js';
+import { callGPTWithFAQ_before_esim } from './callGPTWithFAQ_before_esim.js';
+import { callGPTWithFAQ_before_usim } from './callGPTWithFAQ_before_usim.js';
+import { callGPTWithFAQ_before_wifi } from './callGPTWithFAQ_before_wifi.js';
+import { callGPTWithFAQ_after_esim } from './callGPTWithFAQ_after_esim.js';
+import { callGPTWithFAQ_after_usim } from './callGPTWithFAQ_after_usim.js';
+import { callGPTWithFAQ_after_wifi } from './callGPTWithFAQ_after_wifi.js';
 
 // ✅ 모든 전문가(GPT 함수)들을 하나의 목록으로 관리
 const gptFunctions = {
