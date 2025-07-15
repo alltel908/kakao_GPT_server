@@ -1,6 +1,6 @@
 // handleUserQuestion.js
 
-import { getFAQGptFunctionByCombinedKey } from './index.js';
+import { getFAQGptFunctionByCombinedKey } from './gpt/index.js'; 
 
 /**
  * 구매 상태와 상품 종류를 조합해, 알맞은 전문가에게 답변을 받아오는 함수
