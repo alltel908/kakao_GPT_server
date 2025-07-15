@@ -1,28 +1,39 @@
-// handleUserQuestion.js
+import { callGPTWithFAQ_before_esim } from './callGPTWithFAQ_before_esim.js';
+import { callGPTWithFAQ_before_usim } from './callGPTWithFAQ_before_usim.js';
+import { callGPTWithFAQ_before_wifi } from './callGPTWithFAQ_before_wifi.js';
+import { callGPTWithFAQ_after_esim } from './callGPTWithFAQ_after_esim.js';
+import { callGPTWithFAQ_after_usim } from './callGPTWithFAQ_after_usim.js';
+import { callGPTWithFAQ_after_wifi } from './callGPTWithFAQ_after_wifi.js';
 
-import { getFAQGptFunctionByCombinedKey } from './gpt/index.js'; 
-
-/**
- * 구매 상태와 상품 종류를 조합해, 알맞은 전문가에게 답변을 받아오는 함수
- * @param {string} userInput - 사용자가 입력한 질문
- * @param {string} purchaseState - 'before' 또는 'after'
- * @param {string} productType - 'esim', 'usim', 'wifi' 중 하나
- * @returns {Promise<string>} GPT가 생성한 최종 답변
- */
 export async function getAnswer(userInput, purchaseState, productType) {
-  // 1. 두 정보를 조합하여 키를 만듭니다. (예: "before_usim")
-  const combinedKey = `${purchaseState}_${productType}`;
+  try {
+    console.log('[userInput]', userInput);
+    console.log('[purchaseState]', purchaseState);
+    console.log('[productType]', productType);
 
-  // 2. 조합된 키를 안내 데스크에 전달하여 담당 전문가 함수를 찾습니다.
-  const expertFunction = getFAQGptFunctionByCombinedKey(combinedKey);
+    const key = `${purchaseState}_${productType}`;
 
-  // 3. 만약 담당 전문가가 없다면, 기본 응답을 보냅니다.
-  if (!expertFunction) {
-    console.error(`[오류] ${combinedKey}에 해당하는 전문가 함수를 찾을 수 없습니다.`);
-    return "죄송합니다, 문의하신 내용의 담당자를 찾을 수 없습니다. 다시 선택해 주세요.";
+    // 전문가 함수 매핑
+    const expertMap = {
+      before_esim: callGPTWithFAQ_before_esim,
+      before_usim: callGPTWithFAQ_before_usim,
+      before_wifi: callGPTWithFAQ_before_wifi,
+      after_esim: callGPTWithFAQ_after_esim,
+      after_usim: callGPTWithFAQ_after_usim,
+      after_wifi: callGPTWithFAQ_after_wifi,
+    };
+
+    const expertFunction = expertMap[key];
+
+    if (!expertFunction) {
+      console.error('[오류] 해당하는 전문가 함수를 찾을 수 없습니다:', key);
+      return '죄송합니다, 문의하신 내용의 담당자를 찾을 수 없습니다. 다시 선택해 주세요.';
+    }
+
+    const gptAnswer = await expertFunction(userInput);
+    return gptAnswer;
+  } catch (error) {
+    console.error('[getAnswer Error]', error);
+    return '죄송합니다. 답변을 생성하는 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
   }
-
-  // 4. 찾은 전문가에게 사용자 질문을 넘겨 최종 답변을 받아옵니다.
-  const answer = await expertFunction(userInput);
-  return answer;
 }
