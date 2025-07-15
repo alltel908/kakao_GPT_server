@@ -1,84 +1,65 @@
-// skill.js
-
-import axios from "axios";
-import { getAnswer } from "../handleUserQuestion.js";
+import { getAnswer } from '../handleUserQuestion.js';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const body = req.body;
-  const userInput = body.userRequest?.utterance || "";
-  const callbackUrl = body.userRequest?.callbackUrl;
-  const callbackToken = req.headers["x-kakao-callback-token"];
-
-  // ✅ [수정된 부분] context에서 파라미터 추출
-  const contextParams = body.contexts?.[0]?.params || {};
-  const purchaseState = contextParams.purchase_state;
-  const productType = contextParams.product_type;
-
-  console.log("[userInput]", userInput);
-  console.log("[purchaseState]", purchaseState);
-  console.log("[productType]", productType);
-
-  // ✅ 카카오 선응답
-  res.status(200).json({
-    version: "2.0",
-    useCallback: true,
-    data: { text: "답변을 준비 중이에요 😊" },
-  });
-
   try {
-    // ✅ GPT 응답 생성
-    const gptText = await getAnswer(userInput, purchaseState, productType);
-    console.log("🟢 [GPT 응답]", gptText);
+    const { userRequest, action } = req.body;
 
-    // ✅ 후처리 응답 전달
-    await axios.post(
-      callbackUrl,
-      {
-        version: "2.0",
+    const userInput = userRequest?.utterance;
+    const params = action?.params;
+    const context = action?.clientExtra?.context || {};
+
+    const purchaseState = context.purchase_state || context.purchaseState;
+    const productType = context.product_type || context.productType;
+
+    console.log('[userInput]', userInput);
+    console.log('[purchaseState]', purchaseState);
+    console.log('[productType]', productType);
+
+    // ✅ 필수 context 값 누락 시 안내 메시지 반환
+    if (!purchaseState || !productType) {
+      console.warn('[경고] 필수 context 누락 - 초기 상품 선택 필요');
+      return res.status(200).json({
+        version: '2.0',
         template: {
           outputs: [
             {
               simpleText: {
-                text: gptText,
+                text: '문의하신 상품을 먼저 선택해 주세요.\n(예: 구매 전 유심, 구매 후 이심 등)',
               },
             },
           ],
         },
+      });
+    }
+
+    const gptResponse = await getAnswer(userInput, purchaseState, productType);
+
+    return res.status(200).json({
+      version: '2.0',
+      template: {
+        outputs: [
+          {
+            simpleText: {
+              text: gptResponse,
+            },
+          },
+        ],
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `KakaoAK ${callbackToken}`,
-        },
-      }
-    );
+    });
   } catch (error) {
-    console.error("❗ [GPT 응답 실패]", error.message);
-
-    await axios.post(
-      callbackUrl,
-      {
-        version: "2.0",
-        template: {
-          outputs: [
-            {
-              simpleText: {
-                text: "죄송합니다. GPT 응답 중 오류가 발생했어요. 다시 시도해 주세요 🙏",
-              },
+    console.error('[GPT 응답 오류]', error);
+    return res.status(500).json({
+      version: '2.0',
+      template: {
+        outputs: [
+          {
+            simpleText: {
+              text: '죄송합니다. 응답 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
             },
-          ],
-        },
+          },
+        ],
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `KakaoAK ${callbackToken}`,
-        },
-      }
-    );
+    });
   }
 }
+
