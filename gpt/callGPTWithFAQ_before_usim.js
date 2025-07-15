@@ -80,7 +80,7 @@ const usimFAQ = [
   }
 ];
 
-export async function callGPTWithFAQ_before_usim(userInput) {
+export async function callGPTWithFAQ_usim(userInput) {
   const faqTextBlock = usimFAQ
     .map(
       (f, i) => `#${i + 1}\nQ: ${f.question}\nK: ${f.keywords.join(', ')}\nA: ${f.answer}`

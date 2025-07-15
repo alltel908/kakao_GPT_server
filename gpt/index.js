@@ -1,6 +1,5 @@
-// index.js (최종 수정본)
+// index.js
 
-// ✅ 함수 이름에 중괄호 {} 를 추가해서, 이름표가 붙은 함수를 정확히 가져옵니다.
 import { callGPTWithFAQ_before_esim } from './gpt/callGPTWithFAQ_before_esim.js';
 import { callGPTWithFAQ_before_usim } from './gpt/callGPTWithFAQ_before_usim.js';
 import { callGPTWithFAQ_before_wifi } from './gpt/callGPTWithFAQ_before_wifi.js';
@@ -8,6 +7,7 @@ import { callGPTWithFAQ_after_esim } from './gpt/callGPTWithFAQ_after_esim.js';
 import { callGPTWithFAQ_after_usim } from './gpt/callGPTWithFAQ_after_usim.js';
 import { callGPTWithFAQ_after_wifi } from './gpt/callGPTWithFAQ_after_wifi.js';
 
+// ✅ 모든 전문가(GPT 함수)들을 하나의 목록으로 관리
 const gptFunctions = {
   before_esim: callGPTWithFAQ_before_esim,
   before_usim: callGPTWithFAQ_before_usim,

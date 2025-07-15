@@ -20,7 +20,7 @@ const esimFAQ = [
 ];
 
 // GPT 호출 함수
-export async function callGPTWithFAQ_before_esim(userInput) {
+export async function callGPTWithFAQ_esim(userInput) {
   const faqTextBlock = esimFAQ
     .map(
       (f, i) => `#${i + 1}\nQ: ${f.question}\nK: ${f.keywords.join(', ')}\nA: ${f.answer}`
