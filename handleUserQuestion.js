@@ -1,16 +1,17 @@
-import { callGPTWithFAQ_esim } from './gpt/callGPTWithFAQ_esim.js';
-import { callGPTWithFAQ_usim } from './gpt/callGPTWithFAQ_usim.js';
-import { callGPTWithFAQ_wifi } from './gpt/callGPTWithFAQ_wifi.js';
+import { OpenAI } from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function getAnswer(userInput) {
-  const lowerInput = userInput.toLowerCase();
+  const res = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [
+      { role: 'system', content: '당신은 친절한 고객센터 챗봇입니다.' },
+      { role: 'user', content: userInput },
+    ],
+  });
 
-  if (lowerInput.includes('와이파이') || lowerInput.includes('wifi')) {
-    return await callGPTWithFAQ_wifi(userInput);
-  } else if (lowerInput.includes('usim') || lowerInput.includes('유심')) {
-    return await callGPTWithFAQ_usim(userInput);
-  } else {
-    return await callGPTWithFAQ_esim(userInput); // 기본값
-  }
+  return res.choices[0]?.message?.content?.trim();
 }
-
